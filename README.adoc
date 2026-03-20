@@ -1,0 +1,53 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Futharkiser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:icons: font
+
+== What Is This?
+
+Futharkiser compiles annotated array operations to **blazing GPU kernels**
+via Futhark — without the user touching CUDA, OpenCL, or GPU programming.
+
+Futhark is a purely functional GPU programming language that generates
+optimal CUDA/OpenCL code. Almost nobody knows it exists. Futharkiser
+democratises GPU computing.
+
+== How It Works
+
+Annotate array operations in your code with `#[futharkise]` (or describe them
+in `futharkiser.toml`). Futharkiser:
+
+1. Identifies parallelisable array operations (map, reduce, scan, scatter)
+2. Generates Futhark kernels with optimal memory layouts
+3. Creates a Zig FFI bridge to the compiled GPU code
+4. Falls back to CPU if no GPU is available
+
+== Key Value
+
+* **GPU computing for everyone** — no CUDA expertise needed
+* **10-1000x speedups** on array-heavy workloads
+* **Automatic memory management** across CPU/GPU boundary
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern (same as https://github.com/hyperpolymath/chapeliser[Chapeliser]):
+
+* **Manifest** (`futharkiser.toml`) — describe WHAT you want
+* **Idris2 ABI** (`src/abi/`) — formal proofs of interface correctness
+* **Zig FFI** (`ffi/zig/`) — C-ABI bridge to target language runtime
+* **Codegen** (`src/codegen/`) — generates target language wrapper code
+* **Rust CLI** — parses manifest, validates, generates, builds, runs
+
+User writes zero target language code. Futharkiser generates everything.
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family] of acceleration frameworks.
+
+== Status
+
+**Pre-alpha.** Architecture defined, scaffolding in place, codegen pending.
+
+== License
+
+SPDX-License-Identifier: PMPL-1.0-or-later
