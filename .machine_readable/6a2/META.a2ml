@@ -4,22 +4,40 @@
 
 (meta
   (version "0.1.0")
-  (last-updated "2026-03-20")
+  (last-updated "2026-03-21")
 
   (architecture-decisions
     (adr "001-iser-pattern"
       (status "accepted")
-      (context "Need to make powerful languages accessible without steep learning curves")
-      (decision "Use manifest-driven code generation: user describes WHAT, tool generates HOW")
-      (consequences "Users write zero target language code; all complexity in the -iser"))
+      (context "Need to make Futhark GPU programming accessible without steep learning curves")
+      (decision "Use manifest-driven code generation: user describes WHAT array operations to accelerate, futharkiser generates Futhark SOACs and compiles to GPU kernels")
+      (consequences "Users write zero Futhark/CUDA/OpenCL code; all complexity in the -iser"))
 
     (adr "002-abi-ffi-standard"
       (status "accepted")
-      (context "Need verified interop between Rust CLI, target language, and user code")
-      (decision "Idris2 ABI for formal proofs, Zig FFI for C-ABI bridge")
-      (consequences "Compile-time correctness guarantees; zero runtime overhead from proofs"))
+      (context "Need verified interop between Rust CLI, Futhark GPU kernels, and user code")
+      (decision "Idris2 ABI for formal proofs of parallelism safety and GPU buffer layouts; Zig FFI for C-ABI bridge to Futhark runtime")
+      (consequences "Compile-time correctness guarantees for GPU memory management; zero runtime overhead from proofs"))
 
-    (adr "003-rsr-template"
+    (adr "003-futhark-soacs"
+      (status "accepted")
+      (context "Futhark's power comes from its second-order array combinators (SOACs)")
+      (decision "Map source patterns to Futhark SOACs: map, reduce, scan, scatter, flatten/unflatten")
+      (consequences "Covers the vast majority of data-parallel GPU workloads; Futhark compiler handles fusion and tiling"))
+
+    (adr "004-gpu-backends"
+      (status "accepted")
+      (context "Different users have different GPU hardware; some have no GPU at all")
+      (decision "Support all four Futhark backends: OpenCL (widest), CUDA (NVIDIA), multicore CPU, sequential C (debug)")
+      (consequences "futharkiser works everywhere, from headless servers to developer laptops"))
+
+    (adr "005-memory-space-tracking"
+      (status "accepted")
+      (context "GPU programming requires explicit management of host vs device memory")
+      (decision "Track MemorySpace (Device/Host/Shared) in the ABI type system with transfer validity proofs")
+      (consequences "Prevents invalid cross-boundary accesses at compile time; enables minimisation of host-device copies"))
+
+    (adr "006-rsr-template"
       (status "accepted")
       (context "Need consistent project structure across 29+ -iser repos")
       (decision "All repos cloned from rsr-template-repo with full CI/CD and governance")
@@ -27,15 +45,18 @@
 
   (development-practices
     (language "Rust" (purpose "CLI and orchestration"))
-    (language "Idris2" (purpose "ABI formal proofs"))
-    (language "Zig" (purpose "FFI C-ABI bridge"))
+    (language "Idris2" (purpose "ABI formal proofs — parallelism safety, GPU buffer layout verification"))
+    (language "Zig" (purpose "FFI C-ABI bridge to Futhark-compiled GPU code"))
+    (language "Futhark" (purpose "Generated target — compiled to OpenCL/CUDA GPU kernels"))
     (build-tool "cargo")
     (ci "GitHub Actions (17 workflows)"))
 
   (design-rationale
     (principle "Manifest-driven"
-      (explanation "User intent captured in TOML; all generation is deterministic and reproducible"))
+      (explanation "User intent captured in futharkiser.toml; all generation is deterministic and reproducible"))
     (principle "Formally verified bridges"
-      (explanation "Idris2 dependent types prove interface correctness at compile time"))
-    (principle "Zero target language exposure"
-      (explanation "Users never write Chapel/Julia/Futhark/etc. — the -iser handles everything"))))
+      (explanation "Idris2 dependent types prove parallelism safety (associativity of reduce operators, purity of map functions, array shape compatibility) at compile time"))
+    (principle "Zero GPU expertise required"
+      (explanation "Users never write Futhark, CUDA, or OpenCL — futharkiser generates everything from high-level array operation annotations"))
+    (principle "GPU buffer layout proofs"
+      (explanation "The ABI layer includes a GPUBufferDescriptor struct layout that is verified to match between Idris2 and Zig at compile time (32 bytes, 8-byte aligned)"))))

@@ -6,12 +6,14 @@
   (version "0.1.0")
   (name "futharkiser")
   (type "tool")
-  (purpose "Compile annotated array operations to GPU kernels via Futhark")
+  (purpose "Compile annotated array operations to GPU kernels via Futhark — identifies map/reduce/scan/scatter patterns, generates Futhark SOACs, compiles to OpenCL/CUDA/multicore GPU code")
 
   (position-in-ecosystem
     (family "-iser acceleration frameworks")
     (meta-framework "iseriser")
     (relationship "sibling")
+    (domain "GPU computing / array parallelism")
+    (target-language "Futhark (by Troels Henriksen et al., DIKU Copenhagen)")
     (top-3 ("typedqliser" "chapeliser" "verisimiser")))
 
   (related-projects
@@ -27,6 +29,9 @@
     (project "verisimiser"
       (relationship "sibling-priority-3")
       (description "VeriSimDB octad database augmentation"))
+    (project "halideiser"
+      (relationship "sibling — image processing overlap")
+      (description "Halide image processing pipeline generation; overlaps with futharkiser for image convolutions but Halide is schedule-based while Futhark is functional"))
     (project "squeakwell"
       (relationship "sibling")
       (description "Database recovery via constraint propagation"))
@@ -35,4 +40,11 @@
       (description "Shared Idris2 verified library"))
     (project "typell"
       (relationship "dependency")
-      (description "Type theory engine"))))
+      (description "Type theory engine")))
+
+  (external-dependencies
+    (project "futhark"
+      (relationship "compilation-target")
+      (url "https://futhark-lang.org")
+      (description "Purely functional array language by DIKU Copenhagen — compiles to OpenCL/CUDA GPU kernels")
+      (license "ISC"))))

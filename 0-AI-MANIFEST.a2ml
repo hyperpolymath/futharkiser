@@ -1,19 +1,26 @@
-# ⚠️ STOP - CRITICAL READING REQUIRED
+# STOP - CRITICAL READING REQUIRED
 
 **THIS FILE MUST BE READ FIRST BY ALL AI AGENTS**
 
 ## WHAT IS THIS?
 
-This is the AI manifest for **[YOUR-REPO-NAME]**. It declares:
+This is the AI manifest for **futharkiser**. It declares:
 - Canonical file locations (where things MUST be, and nowhere else)
 - Critical invariants (rules that must NEVER be violated)
 - Repository structure and organization
+
+**futharkiser** compiles annotated array operations to GPU kernels via Futhark.
+It identifies array-parallel patterns (map, reduce, scan, scatter) in source code,
+generates Futhark programs using second-order array combinators (SOACs), and compiles
+them to OpenCL/CUDA/multicore GPU code via the Futhark compiler. The Idris2 ABI layer
+formally proves parallelism safety and correct GPU buffer layouts. The Zig FFI layer
+provides the C-ABI bridge between the host application and Futhark-compiled kernels.
 
 ## CANONICAL LOCATIONS (UNIVERSAL RULE)
 
 ### Machine-Readable Metadata: `.machine_readable/` ONLY
 
-These 6 a2ml files MUST exist in `.machine_readable/` directory ONLY:
+These 6 a2ml files MUST exist in `.machine_readable/6a2/` directory ONLY:
 1. **STATE.a2ml** - Project state, progress, blockers
 2. **META.a2ml** - Architecture decisions, governance
 3. **ECOSYSTEM.a2ml** - Position in ecosystem, relationships
@@ -46,7 +53,7 @@ Do not place maintenance policy files in repository root.
 
 ### Bot Directives: `.machine_readable/bot_directives/` ONLY
 
-Bot-specific instructions for your automated agents.
+Bot-specific instructions for automated agents.
 
 ### Contractiles: `.machine_readable/contractiles/` ONLY
 
@@ -55,7 +62,7 @@ Policy enforcement contracts (k9, dust, lust, must, trust).
 ### AI Configuration & Guides: `.machine_readable/ai/` ONLY
 
 - `AI.a2ml` - Language-specific or LLM-specific patterns
-- `PLACEHOLDERS.md` - Bootstrap guide
+- `PLACEHOLDERS.adoc` - Bootstrap guide
 
 ### Community & Forge Metadata: `.github/` ONLY
 
@@ -80,42 +87,50 @@ Policy enforcement contracts (k9, dust, lust, must, trust).
 6. **Container images** - MUST use Chainguard base (`cgr.dev/chainguard/wolfi-base:latest` or `cgr.dev/chainguard/static:latest`)
 7. **Container runtime** - Podman, never Docker. Files are `Containerfile`, never `Dockerfile`
 8. **Container orchestration** - `selur-compose`, never `docker-compose`
+9. **Futhark specifics** - SOACs are map/reduce/scan/scatter; GPU backends are OpenCL/CUDA/multicore/sequential
+10. **ABI/FFI contract** - Idris2 Types.idr defines the domain types (SOAC, GPUBackend, ArrayShape, MemorySpace, ParallelPattern); Zig main.zig must match these exactly
 
 ## REPOSITORY STRUCTURE
 
 This repo follows the **Dual-Track** architecture:
 
 ```
-[YOUR-REPO-NAME]/
+futharkiser/
 ├── 0-AI-MANIFEST.a2ml         # THIS FILE (start here)
 ├── README.adoc                 # High-level orientation (Rich Human)
-├── ROADMAP.adoc                # Future direction
+├── ROADMAP.adoc                # Phased roadmap (scaffold → GPU compilation → proofs)
 ├── CONTRIBUTING.adoc           # Human contribution guide
-├── GOVERNANCE.adoc             # Decision-making model
-├── Justfile                    # Task runner
+├── Cargo.toml                  # Rust CLI build
 ├── Containerfile               # OCI build
-├── LICENSE                     # Primary license
-├── src/                        # Source code
+├── LICENSE                     # PMPL-1.0-or-later
+├── src/
+│   ├── main.rs                 # CLI entry point (init, validate, generate, build, run)
+│   ├── lib.rs                  # Library API
+│   ├── manifest/mod.rs         # futharkiser.toml parser
+│   ├── codegen/mod.rs          # Futhark code generation from detected patterns
 │   └── interface/              # Verified Interface Seams
-│       ├── abi/                # Idris2 ABI (The Spec)
-│       ├── ffi/                # Zig FFI (The Bridge)
-│       └── generated/          # C Headers (The Result)
+│       ├── abi/                # Idris2 ABI (formal proofs of parallelism safety)
+│       │   ├── Types.idr       # SOAC, GPUBackend, ArrayShape, MemorySpace, etc.
+│       │   ├── Layout.idr      # GPU buffer descriptor layout proofs
+│       │   └── Foreign.idr     # FFI declarations (compile, execute, alloc_buffer)
+│       ├── ffi/                # Zig FFI (C-ABI bridge to Futhark runtime)
+│       │   ├── build.zig       # Build config for libfutharkiser
+│       │   ├── src/main.zig    # FFI implementation
+│       │   └── test/           # Integration tests
+│       └── generated/          # Auto-generated C headers
 ├── container/                  # Stapeln container ecosystem
-├── docs/                       # Technical depths
-│   ├── attribution/            # Citations, owners, maintainers (adoc)
-│   ├── architecture/           # Topology, diagrams
-│   ├── theory/                 # Domain theory
-│   └── practice/               # Manuals
-├── docs/legal/                  # Legal exhibits and full texts
+├── docs/                       # Technical documentation
 └── .machine_readable/          # ALL machine-readable metadata
+    └── 6a2/                    # STATE, META, ECOSYSTEM, AGENTIC, NEUROSYM, PLAYBOOK
 ```
 
 ## SESSION STARTUP CHECKLIST
 
-✅ Read THIS file (0-AI-MANIFEST.a2ml) first
-✅ Understand canonical location: `.machine_readable/`
-✅ State understanding of canonical locations
+1. Read THIS file (0-AI-MANIFEST.a2ml) first
+2. Understand canonical location: `.machine_readable/`
+3. State understanding of canonical locations
+4. Read `.machine_readable/6a2/STATE.a2ml` for current project state
 
 ## ATTESTATION PROOF
 
-**"I have read the AI manifest. All machine-readable content (state files, anchors, policies, bot directives, contractiles, AI guides) is located in `.machine_readable/` ONLY, and community metadata is in `.github/`. I will not create duplicate files in the root directory."**
+**"I have read the AI manifest for futharkiser. All machine-readable content (state files, anchors, policies, bot directives, contractiles, AI guides) is located in `.machine_readable/` ONLY, and community metadata is in `.github/`. I will not create duplicate files in the root directory."**
