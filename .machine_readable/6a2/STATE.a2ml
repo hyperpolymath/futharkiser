@@ -11,28 +11,33 @@
   (project-context
     (name "futharkiser")
     (description "Compile annotated array operations to GPU kernels via Futhark")
-    (status "scaffold — documentation bespoked")
-    (priority "—")
+    (status "alpha")
+    (priority "medium")
     (ecosystem "-iser family (https://github.com/hyperpolymath/iseriser)"))
 
   (current-position
-    (phase "initial-scaffold")
-    (completion-percentage 10)
-    (milestone "Architecture defined, CLI scaffolded, RSR template complete, Idris2 ABI types bespoked (SOAC, GPUBackend, ArrayShape, MemorySpace, ParallelPattern), Zig FFI bespoked with GPU buffer management, documentation updated"))
+    (phase "phase-1-complete")
+    (completion-percentage 45)
+    (milestone "Phase 1 complete — pattern detection, Futhark codegen, build generator")
+    (what-changed
+      "2026-03-21: Phase 1 complete. Pattern detection, Futhark codegen, build generator, GPU buffer management stubs, bespoke manifest parsing. Integration tests passing."))
 
   (route-to-mvp
-    (step 1 "Implement pattern detection — identify map/reduce/scan/scatter in source code")
-    (step 2 "Implement Futhark codegen — generate .fut files from detected patterns")
-    (step 3 "Integrate Futhark compiler invocation (futhark opencl/cuda/multicore/c)")
-    (step 4 "GPU buffer allocation and host<->device memory transfer via Zig FFI")
-    (step 5 "Idris2 proofs of parallelism safety (associativity, purity, shape compatibility)")
-    (step 6 "First end-to-end example: vector addition on GPU via OpenCL backend")
-    (step 7 "Benchmarks against hand-written CUDA/OpenCL"))
+    (step 1 "DONE — Pattern detection for map/reduce/scan/scatter")
+    (step 2 "DONE — Futhark codegen generating .fut files")
+    (step 3 "DONE — Build generator for opencl/cuda/multicore/c backends")
+    (step 4 "DONE — GPU buffer management stubs via Zig FFI")
+    (step 5 "DONE — Bespoke manifest parsing and CLI")
+    (step 6 "TODO — End-to-end GPU kernel compilation and execution")
+    (step 7 "TODO — Idris2 proofs for parallelism safety (associativity, purity)")
+    (step 8 "TODO — Benchmarks against hand-written CUDA/OpenCL")
+    (step 9 "TODO — PanLL panel and BoJ cartridge integration"))
 
   (blockers-and-issues
-    (none "Project is in scaffold phase — no blockers yet"))
+    (note "Futhark compiler not installed on dev machine — .fut output verified by structure")
+    (note "GPU testing requires OpenCL/CUDA runtime"))
 
   (critical-next-actions
-    (action "Implement source-level pattern detection for map/reduce/scan")
-    (action "Generate first .fut Futhark program from detected patterns")
-    (action "Invoke futhark compiler and link generated C library")))
+    (action "Install Futhark compiler and run end-to-end GPU test")
+    (action "Write Idris2 proofs for parallelism safety properties")
+    (action "Benchmark against hand-written CUDA for vector addition")))
