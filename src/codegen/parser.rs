@@ -7,7 +7,7 @@
 // checking SOAC patterns, Futhark types, operator requirements, and bin counts.
 // This is the bridge between the TOML manifest and the code generator.
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 
 use crate::abi::{FutharkType, KernelConfig, SOAC};
 use crate::manifest::{self, Manifest, RawKernelConfig};
@@ -52,10 +52,7 @@ pub fn parse_single_kernel(raw: &RawKernelConfig) -> Result<KernelConfig> {
         }
         SOAC::Histogram => {
             if raw.bins.is_none() || raw.bins == Some(0) {
-                bail!(
-                    "Kernel '{}': histogram pattern requires bins > 0",
-                    raw.name
-                );
+                bail!("Kernel '{}': histogram pattern requires bins > 0", raw.name);
             }
         }
         _ => {}

@@ -25,11 +25,7 @@ use crate::manifest::Manifest;
 /// or other languages without compiling the Futhark program first.
 pub fn generate_c_header(manifest: &Manifest, kernels: &[KernelConfig]) -> Result<String> {
     let mut out = String::with_capacity(2048);
-    let guard = manifest
-        .project
-        .name
-        .to_uppercase()
-        .replace('-', "_");
+    let guard = manifest.project.name.to_uppercase().replace('-', "_");
 
     // Header preamble.
     out.push_str(&format!(
@@ -187,10 +183,7 @@ pub fn generate_build_script(manifest: &Manifest, fut_source_path: &Path) -> Res
 
     // Optional auto-tuning.
     if manifest.gpu.tuning {
-        out.push_str(&format!(
-            "echo \"Auto-tuning for backend '{}'\"\n",
-            backend
-        ));
+        out.push_str(&format!("echo \"Auto-tuning for backend '{}'\"\n", backend));
         out.push_str(&format!(
             "futhark autotune --backend={} {}\n\n",
             backend, source
@@ -245,9 +238,12 @@ mod tests {
     #[test]
     fn test_c_header_structure() {
         let manifest = test_manifest();
-        let kernels = vec![
-            make_kernel("blur", SOAC::Map, FutharkType::F32, FutharkType::F32),
-        ];
+        let kernels = vec![make_kernel(
+            "blur",
+            SOAC::Map,
+            FutharkType::F32,
+            FutharkType::F32,
+        )];
         let header = generate_c_header(&manifest, &kernels).unwrap();
         assert!(header.contains("#ifndef TEST_PROJECT_H"));
         assert!(header.contains("#define TEST_PROJECT_H"));
@@ -277,8 +273,7 @@ mod tests {
     #[test]
     fn test_build_script_contains_backend() {
         let manifest = test_manifest();
-        let script =
-            generate_build_script(&manifest, Path::new("test-project.fut")).unwrap();
+        let script = generate_build_script(&manifest, Path::new("test-project.fut")).unwrap();
         assert!(script.contains("futhark opencl test-project.fut"));
         assert!(!script.contains("autotune"));
     }
@@ -287,16 +282,14 @@ mod tests {
     fn test_build_script_with_tuning() {
         let mut manifest = test_manifest();
         manifest.gpu.tuning = true;
-        let script =
-            generate_build_script(&manifest, Path::new("test-project.fut")).unwrap();
+        let script = generate_build_script(&manifest, Path::new("test-project.fut")).unwrap();
         assert!(script.contains("futhark autotune"));
     }
 
     #[test]
     fn test_build_script_checks_futhark_installed() {
         let manifest = test_manifest();
-        let script =
-            generate_build_script(&manifest, Path::new("test.fut")).unwrap();
+        let script = generate_build_script(&manifest, Path::new("test.fut")).unwrap();
         assert!(script.contains("command -v futhark"));
     }
 }

@@ -199,7 +199,9 @@ impl FutharkType {
 
     /// All valid type name strings.
     pub fn all_names() -> &'static [&'static str] {
-        &["f32", "f64", "i32", "i64", "u8", "u16", "u32", "u64", "bool"]
+        &[
+            "f32", "f64", "i32", "i64", "u8", "u16", "u32", "u64", "bool",
+        ]
     }
 }
 
@@ -346,7 +348,10 @@ mod tests {
     fn test_futhark_type_parsing() {
         assert_eq!(FutharkType::from_array_str("[f32]"), Some(FutharkType::F32));
         assert_eq!(FutharkType::from_array_str("[u8]"), Some(FutharkType::U8));
-        assert_eq!(FutharkType::from_array_str("[bool]"), Some(FutharkType::Bool));
+        assert_eq!(
+            FutharkType::from_array_str("[bool]"),
+            Some(FutharkType::Bool)
+        );
         assert_eq!(FutharkType::from_array_str("bad"), None);
     }
 

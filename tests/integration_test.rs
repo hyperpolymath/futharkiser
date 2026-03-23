@@ -110,8 +110,7 @@ fn test_generate_produces_fut_files() {
     let (dir, m) = setup_full_manifest();
     let output_dir = dir.path().join("output");
 
-    codegen::generate_all(&m, output_dir.to_str().unwrap())
-        .expect("generate_all should succeed");
+    codegen::generate_all(&m, output_dir.to_str().unwrap()).expect("generate_all should succeed");
 
     // Check that the .fut file was created.
     let fut_path = output_dir.join("image-pipeline.fut");
@@ -221,8 +220,9 @@ backend = "{}"
 "#,
             backend
         );
-        let m: Manifest = toml::from_str(&toml_str)
-            .unwrap_or_else(|e| panic!("Failed to parse manifest with backend '{}': {}", backend, e));
+        let m: Manifest = toml::from_str(&toml_str).unwrap_or_else(|e| {
+            panic!("Failed to parse manifest with backend '{}': {}", backend, e)
+        });
         manifest::validate(&m)
             .unwrap_or_else(|e| panic!("Validation failed for backend '{}': {}", backend, e));
     }
@@ -240,8 +240,14 @@ fn test_histogram_kernel_in_output() {
 
     let fut_source = fs::read_to_string(output_dir.join("image-pipeline.fut")).unwrap();
 
-    assert!(fut_source.contains("entry histogram"), "Should contain entry histogram");
-    assert!(fut_source.contains("reduce_by_index"), "Should use reduce_by_index SOAC");
+    assert!(
+        fut_source.contains("entry histogram"),
+        "Should contain entry histogram"
+    );
+    assert!(
+        fut_source.contains("reduce_by_index"),
+        "Should use reduce_by_index SOAC"
+    );
     assert!(fut_source.contains("replicate 256"), "Should have 256 bins");
 }
 
@@ -253,9 +259,18 @@ fn test_scatter_kernel_in_output() {
 
     let fut_source = fs::read_to_string(output_dir.join("image-pipeline.fut")).unwrap();
 
-    assert!(fut_source.contains("entry write_pixels"), "Should contain entry write_pixels");
-    assert!(fut_source.contains("scatter dest is vs"), "Should use scatter SOAC");
-    assert!(fut_source.contains("*[]f32"), "Should have unique array annotation");
+    assert!(
+        fut_source.contains("entry write_pixels"),
+        "Should contain entry write_pixels"
+    );
+    assert!(
+        fut_source.contains("scatter dest is vs"),
+        "Should use scatter SOAC"
+    );
+    assert!(
+        fut_source.contains("*[]f32"),
+        "Should have unique array annotation"
+    );
 }
 
 #[test]
@@ -266,12 +281,30 @@ fn test_c_header_contains_all_kernels() {
 
     let header = fs::read_to_string(output_dir.join("image-pipeline.h")).unwrap();
 
-    assert!(header.contains("futhark_entry_blur"), "Header should declare blur");
-    assert!(header.contains("futhark_entry_histogram"), "Header should declare histogram");
-    assert!(header.contains("futhark_entry_prefix_sum"), "Header should declare prefix_sum");
-    assert!(header.contains("futhark_entry_total"), "Header should declare total");
-    assert!(header.contains("futhark_entry_write_pixels"), "Header should declare write_pixels");
-    assert!(header.contains("#ifndef IMAGE_PIPELINE_H"), "Header should have include guard");
+    assert!(
+        header.contains("futhark_entry_blur"),
+        "Header should declare blur"
+    );
+    assert!(
+        header.contains("futhark_entry_histogram"),
+        "Header should declare histogram"
+    );
+    assert!(
+        header.contains("futhark_entry_prefix_sum"),
+        "Header should declare prefix_sum"
+    );
+    assert!(
+        header.contains("futhark_entry_total"),
+        "Header should declare total"
+    );
+    assert!(
+        header.contains("futhark_entry_write_pixels"),
+        "Header should declare write_pixels"
+    );
+    assert!(
+        header.contains("#ifndef IMAGE_PIPELINE_H"),
+        "Header should have include guard"
+    );
 }
 
 #[test]
@@ -282,8 +315,14 @@ fn test_build_script_references_backend() {
 
     let script = fs::read_to_string(output_dir.join("build.sh")).unwrap();
 
-    assert!(script.contains("futhark opencl"), "Script should use opencl backend");
-    assert!(script.contains("autotune"), "Script should include auto-tuning (tuning=true)");
+    assert!(
+        script.contains("futhark opencl"),
+        "Script should use opencl backend"
+    );
+    assert!(
+        script.contains("autotune"),
+        "Script should include auto-tuning (tuning=true)"
+    );
 }
 
 #[test]
@@ -293,5 +332,8 @@ fn test_generated_fut_has_spdx_header() {
     codegen::generate_all(&m, output_dir.to_str().unwrap()).unwrap();
 
     let fut_source = fs::read_to_string(output_dir.join("image-pipeline.fut")).unwrap();
-    assert!(fut_source.contains("PMPL-1.0-or-later"), ".fut file should have SPDX header");
+    assert!(
+        fut_source.contains("PMPL-1.0-or-later"),
+        ".fut file should have SPDX header"
+    );
 }

@@ -8,7 +8,7 @@
 // input/output array types, and optional parameters like reduction operators
 // or histogram bin counts. The `[gpu]` section selects the compilation backend.
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
@@ -96,8 +96,7 @@ fn default_backend() -> String {
 pub fn load_manifest(path: &str) -> Result<Manifest> {
     let content = std::fs::read_to_string(path)
         .with_context(|| format!("Failed to read manifest: {}", path))?;
-    toml::from_str(&content)
-        .with_context(|| format!("Failed to parse manifest: {}", path))
+    toml::from_str(&content).with_context(|| format!("Failed to parse manifest: {}", path))
 }
 
 /// Validate the manifest: checks project name, kernel definitions, types,
@@ -271,7 +270,10 @@ pub fn parse_kernels(manifest: &Manifest) -> Result<Vec<KernelConfig>> {
 pub fn init_manifest(path: &str) -> Result<()> {
     let manifest_path = Path::new(path).join("futharkiser.toml");
     if manifest_path.exists() {
-        bail!("futharkiser.toml already exists at {}", manifest_path.display());
+        bail!(
+            "futharkiser.toml already exists at {}",
+            manifest_path.display()
+        );
     }
     let template = r#"# futharkiser manifest — GPU kernel definitions
 # See https://github.com/hyperpolymath/futharkiser for documentation.
@@ -310,7 +312,10 @@ tuning = false
 /// Print a human-readable summary of the manifest to stdout.
 pub fn print_info(manifest: &Manifest) {
     println!("=== {} ===", manifest.project.name);
-    println!("Backend: {} (tuning: {})", manifest.gpu.backend, manifest.gpu.tuning);
+    println!(
+        "Backend: {} (tuning: {})",
+        manifest.gpu.backend, manifest.gpu.tuning
+    );
     println!("Kernels: {}", manifest.kernels.len());
     for (i, k) in manifest.kernels.iter().enumerate() {
         println!(
