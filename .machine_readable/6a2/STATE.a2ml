@@ -1,43 +1,40 @@
-;; SPDX-License-Identifier: PMPL-1.0-or-later
-;; Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-;; STATE.a2ml — Current project state for futharkiser
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Futharkiser project state
+[metadata]
+project = "futharkiser"
+version = "0.1.0"
+last-updated = "2026-03-21"
+status = "active"
+session = "converted from scheme — 2026-04-11"
 
-(state
-  (metadata
-    (version "0.1.0")
-    (last-updated "2026-03-21")
-    (author "Jonathan D.A. Jewell"))
+[project-context]
+name = "Futharkiser"
+purpose = """Compile annotated array operations to GPU kernels via Futhark"""
+completion-percentage = 45
 
-  (project-context
-    (name "futharkiser")
-    (description "Compile annotated array operations to GPU kernels via Futhark")
-    (status "alpha")
-    (priority "medium")
-    (ecosystem "-iser family (https://github.com/hyperpolymath/iseriser)"))
+[position]
+phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
 
-  (current-position
-    (phase "phase-1-complete")
-    (completion-percentage 45)
-    (milestone "Phase 1 complete — pattern detection, Futhark codegen, build generator")
-    (what-changed
-      "2026-03-21: Phase 1 complete. Pattern detection, Futhark codegen, build generator, GPU buffer management stubs, bespoke manifest parsing. Integration tests passing."))
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
 
-  (route-to-mvp
-    (step 1 "DONE — Pattern detection for map/reduce/scan/scatter")
-    (step 2 "DONE — Futhark codegen generating .fut files")
-    (step 3 "DONE — Build generator for opencl/cuda/multicore/c backends")
-    (step 4 "DONE — GPU buffer management stubs via Zig FFI")
-    (step 5 "DONE — Bespoke manifest parsing and CLI")
-    (step 6 "TODO — End-to-end GPU kernel compilation and execution")
-    (step 7 "TODO — Idris2 proofs for parallelism safety (associativity, purity)")
-    (step 8 "TODO — Benchmarks against hand-written CUDA/OpenCL")
-    (step 9 "TODO — PanLL panel and BoJ cartridge integration"))
+[blockers-and-issues]
+issues = [
+  "Futhark compiler not installed on dev machine — .fut output verified by structure",
+]
 
-  (blockers-and-issues
-    (note "Futhark compiler not installed on dev machine — .fut output verified by structure")
-    (note "GPU testing requires OpenCL/CUDA runtime"))
+[critical-next-actions]
+actions = [
+  "Install Futhark compiler and run end-to-end GPU test",
+  "Write Idris2 proofs for parallelism safety properties",
+  "Benchmark against hand-written CUDA for vector addition",
+]
 
-  (critical-next-actions
-    (action "Install Futhark compiler and run end-to-end GPU test")
-    (action "Write Idris2 proofs for parallelism safety properties")
-    (action "Benchmark against hand-written CUDA for vector addition")))
+[maintenance-status]
+last-run-utc = "2026-03-21T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail

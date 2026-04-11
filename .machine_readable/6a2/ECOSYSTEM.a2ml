@@ -1,50 +1,20 @@
-;; SPDX-License-Identifier: PMPL-1.0-or-later
-;; Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-;; ECOSYSTEM.a2ml — Ecosystem position for futharkiser
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# ECOSYSTEM.a2ml — Futharkiser ecosystem position
+[metadata]
+version = "0.1.0"
+last-updated = "2026-04-11"
 
-(ecosystem
-  (version "0.1.0")
-  (name "futharkiser")
-  (type "tool")
-  (purpose "Compile annotated array operations to GPU kernels via Futhark — identifies map/reduce/scan/scatter patterns, generates Futhark SOACs, compiles to OpenCL/CUDA/multicore GPU code")
+[project]
+name = "Futharkiser"
+purpose = "Compile annotated array operations to GPU kernels via Futhark — identifies map/reduce/scan/scatter patterns, generates Futhark SOACs, compiles to OpenCL/CUDA/multicore GPU code"
+role = "tool"
 
-  (position-in-ecosystem
-    (family "-iser acceleration frameworks")
-    (meta-framework "iseriser")
-    (relationship "sibling")
-    (domain "GPU computing / array parallelism")
-    (target-language "Futhark (by Troels Henriksen et al., DIKU Copenhagen)")
-    (top-3 ("typedqliser" "chapeliser" "verisimiser")))
+[position-in-ecosystem]
+category = ""
 
-  (related-projects
-    (project "iseriser"
-      (relationship "meta-framework")
-      (description "Generates new -iser project scaffolding"))
-    (project "typedqliser"
-      (relationship "sibling-priority-1")
-      (description "Formal type safety for any query language"))
-    (project "chapeliser"
-      (relationship "sibling-priority-2")
-      (description "Chapel distributed computing acceleration"))
-    (project "verisimiser"
-      (relationship "sibling-priority-3")
-      (description "VeriSimDB octad database augmentation"))
-    (project "halideiser"
-      (relationship "sibling — image processing overlap")
-      (description "Halide image processing pipeline generation; overlaps with futharkiser for image convolutions but Halide is schedule-based while Futhark is functional"))
-    (project "squeakwell"
-      (relationship "sibling")
-      (description "Database recovery via constraint propagation"))
-    (project "proven"
-      (relationship "dependency")
-      (description "Shared Idris2 verified library"))
-    (project "typell"
-      (relationship "dependency")
-      (description "Type theory engine")))
-
-  (external-dependencies
-    (project "futhark"
-      (relationship "compilation-target")
-      (url "https://futhark-lang.org")
-      (description "Purely functional array language by DIKU Copenhagen — compiles to OpenCL/CUDA GPU kernels")
-      (license "ISC"))))
+[related-projects]
+projects = [
+  # No related projects recorded
+]
