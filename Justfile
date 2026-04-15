@@ -2,6 +2,8 @@
 # futharkiser — Compile annotated array operations to GPU kernels via Futhark
 
 # Default: build and test
+import? "contractile.just"
+
 default: build test
 
 # Build release binary
