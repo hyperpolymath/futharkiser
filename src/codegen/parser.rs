@@ -93,7 +93,7 @@ mod tests {
     #[test]
     fn test_parse_map_kernel() {
         let raw = raw_kernel("blur", "map", "[f32]", "[f32]");
-        let kc = parse_single_kernel(&raw).unwrap();
+        let kc = parse_single_kernel(&raw).expect("TODO: handle error");
         assert_eq!(kc.pattern, SOAC::Map);
         assert_eq!(kc.input_type, FutharkType::F32);
         assert_eq!(kc.output_type, FutharkType::F32);
@@ -103,7 +103,7 @@ mod tests {
     fn test_parse_reduce_kernel() {
         let mut raw = raw_kernel("sum", "reduce", "[f64]", "[f64]");
         raw.operator = Some("+".to_string());
-        let kc = parse_single_kernel(&raw).unwrap();
+        let kc = parse_single_kernel(&raw).expect("TODO: handle error");
         assert_eq!(kc.pattern, SOAC::Reduce);
         assert_eq!(kc.operator, Some("+".to_string()));
     }
@@ -112,14 +112,14 @@ mod tests {
     fn test_parse_scan_kernel() {
         let mut raw = raw_kernel("prefix", "scan", "[i32]", "[i32]");
         raw.operator = Some("+".to_string());
-        let kc = parse_single_kernel(&raw).unwrap();
+        let kc = parse_single_kernel(&raw).expect("TODO: handle error");
         assert_eq!(kc.pattern, SOAC::Scan);
     }
 
     #[test]
     fn test_parse_scatter_kernel() {
         let raw = raw_kernel("write", "scatter", "[f32]", "[f32]");
-        let kc = parse_single_kernel(&raw).unwrap();
+        let kc = parse_single_kernel(&raw).expect("TODO: handle error");
         assert_eq!(kc.pattern, SOAC::Scatter);
     }
 
@@ -127,7 +127,7 @@ mod tests {
     fn test_parse_histogram_kernel() {
         let mut raw = raw_kernel("hist", "histogram", "[u8]", "[i64]");
         raw.bins = Some(256);
-        let kc = parse_single_kernel(&raw).unwrap();
+        let kc = parse_single_kernel(&raw).expect("TODO: handle error");
         assert_eq!(kc.pattern, SOAC::Histogram);
         assert_eq!(kc.bins, Some(256));
     }

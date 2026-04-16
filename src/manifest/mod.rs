@@ -362,7 +362,7 @@ backend = "c"
 
     #[test]
     fn test_parse_minimal_manifest() {
-        let m: Manifest = toml::from_str(&minimal_toml()).unwrap();
+        let m: Manifest = toml::from_str(&minimal_toml()).expect("TODO: handle error");
         assert_eq!(m.project.name, "test");
         assert_eq!(m.kernels.len(), 1);
         assert_eq!(m.kernels[0].name, "k1");
@@ -371,7 +371,7 @@ backend = "c"
 
     #[test]
     fn test_validate_minimal() {
-        let m: Manifest = toml::from_str(&minimal_toml()).unwrap();
+        let m: Manifest = toml::from_str(&minimal_toml()).expect("TODO: handle error");
         validate(&m).expect("minimal manifest should be valid");
     }
 
@@ -386,7 +386,7 @@ pattern = "map"
 input-type = "[f32]"
 output-type = "[f32]"
 "#;
-        let m: Manifest = toml::from_str(toml_str).unwrap();
+        let m: Manifest = toml::from_str(toml_str).expect("TODO: handle error");
         assert!(validate(&m).is_err());
     }
 
@@ -401,7 +401,7 @@ pattern = "reduce"
 input-type = "[f64]"
 output-type = "[f64]"
 "#;
-        let m: Manifest = toml::from_str(toml_str).unwrap();
+        let m: Manifest = toml::from_str(toml_str).expect("TODO: handle error");
         let err = validate(&m).unwrap_err();
         assert!(err.to_string().contains("operator"));
     }
@@ -417,7 +417,7 @@ pattern = "histogram"
 input-type = "[u8]"
 output-type = "[i64]"
 "#;
-        let m: Manifest = toml::from_str(toml_str).unwrap();
+        let m: Manifest = toml::from_str(toml_str).expect("TODO: handle error");
         let err = validate(&m).unwrap_err();
         assert!(err.to_string().contains("bins"));
     }
@@ -433,7 +433,7 @@ pattern = "flatmap"
 input-type = "[f32]"
 output-type = "[f32]"
 "#;
-        let m: Manifest = toml::from_str(toml_str).unwrap();
+        let m: Manifest = toml::from_str(toml_str).expect("TODO: handle error");
         assert!(validate(&m).is_err());
     }
 
@@ -448,7 +448,7 @@ pattern = "map"
 input-type = "[string]"
 output-type = "[f32]"
 "#;
-        let m: Manifest = toml::from_str(toml_str).unwrap();
+        let m: Manifest = toml::from_str(toml_str).expect("TODO: handle error");
         assert!(validate(&m).is_err());
     }
 
@@ -468,7 +468,7 @@ pattern = "map"
 input-type = "[i32]"
 output-type = "[i32]"
 "#;
-        let m: Manifest = toml::from_str(toml_str).unwrap();
+        let m: Manifest = toml::from_str(toml_str).expect("TODO: handle error");
         let err = validate(&m).unwrap_err();
         assert!(err.to_string().contains("duplicate"));
     }
@@ -491,8 +491,8 @@ input-type = "[f64]"
 output-type = "[f64]"
 operator = "+"
 "#;
-        let m: Manifest = toml::from_str(toml_str).unwrap();
-        let kernels = parse_kernels(&m).unwrap();
+        let m: Manifest = toml::from_str(toml_str).expect("TODO: handle error");
+        let kernels = parse_kernels(&m).expect("TODO: handle error");
         assert_eq!(kernels.len(), 2);
         assert_eq!(kernels[0].pattern, SOAC::Map);
         assert_eq!(kernels[0].input_type, FutharkType::F32);
@@ -502,20 +502,20 @@ operator = "+"
 
     #[test]
     fn test_parse_all_backends() {
-        assert_eq!(parse_backend("opencl").unwrap(), GPUBackend::OpenCL);
-        assert_eq!(parse_backend("cuda").unwrap(), GPUBackend::CUDA);
-        assert_eq!(parse_backend("multicore").unwrap(), GPUBackend::Multicore);
-        assert_eq!(parse_backend("c").unwrap(), GPUBackend::C);
+        assert_eq!(parse_backend("opencl").expect("TODO: handle error"), GPUBackend::OpenCL);
+        assert_eq!(parse_backend("cuda").expect("TODO: handle error"), GPUBackend::CUDA);
+        assert_eq!(parse_backend("multicore").expect("TODO: handle error"), GPUBackend::Multicore);
+        assert_eq!(parse_backend("c").expect("TODO: handle error"), GPUBackend::C);
         assert!(parse_backend("vulkan").is_err());
     }
 
     #[test]
     fn test_parse_all_patterns() {
-        assert_eq!(parse_pattern("map").unwrap(), SOAC::Map);
-        assert_eq!(parse_pattern("reduce").unwrap(), SOAC::Reduce);
-        assert_eq!(parse_pattern("scan").unwrap(), SOAC::Scan);
-        assert_eq!(parse_pattern("scatter").unwrap(), SOAC::Scatter);
-        assert_eq!(parse_pattern("histogram").unwrap(), SOAC::Histogram);
+        assert_eq!(parse_pattern("map").expect("TODO: handle error"), SOAC::Map);
+        assert_eq!(parse_pattern("reduce").expect("TODO: handle error"), SOAC::Reduce);
+        assert_eq!(parse_pattern("scan").expect("TODO: handle error"), SOAC::Scan);
+        assert_eq!(parse_pattern("scatter").expect("TODO: handle error"), SOAC::Scatter);
+        assert_eq!(parse_pattern("histogram").expect("TODO: handle error"), SOAC::Histogram);
     }
 
     #[test]
@@ -529,7 +529,7 @@ pattern = "map"
 input-type = "[f32]"
 output-type = "[f32]"
 "#;
-        let m: Manifest = toml::from_str(toml_str).unwrap();
+        let m: Manifest = toml::from_str(toml_str).expect("TODO: handle error");
         assert_eq!(m.gpu.backend, "opencl");
         assert!(!m.gpu.tuning);
     }

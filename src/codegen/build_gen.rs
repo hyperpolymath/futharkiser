@@ -244,7 +244,7 @@ mod tests {
             FutharkType::F32,
             FutharkType::F32,
         )];
-        let header = generate_c_header(&manifest, &kernels).unwrap();
+        let header = generate_c_header(&manifest, &kernels).expect("TODO: handle error");
         assert!(header.contains("#ifndef TEST_PROJECT_H"));
         assert!(header.contains("#define TEST_PROJECT_H"));
         assert!(header.contains("#include <stdint.h>"));
@@ -257,7 +257,7 @@ mod tests {
         let manifest = test_manifest();
         let mut kernel = make_kernel("sum", SOAC::Reduce, FutharkType::F64, FutharkType::F64);
         kernel.operator = Some("+".to_string());
-        let header = generate_c_header(&manifest, &[kernel]).unwrap();
+        let header = generate_c_header(&manifest, &[kernel]).expect("TODO: handle error");
         assert!(header.contains("double *out"));
     }
 
@@ -265,7 +265,7 @@ mod tests {
     fn test_c_header_scatter_has_three_args() {
         let manifest = test_manifest();
         let kernel = make_kernel("write", SOAC::Scatter, FutharkType::F32, FutharkType::F32);
-        let header = generate_c_header(&manifest, &[kernel]).unwrap();
+        let header = generate_c_header(&manifest, &[kernel]).expect("TODO: handle error");
         assert!(header.contains("dest"));
         assert!(header.contains("futhark_i64_1d *is"));
     }
@@ -273,7 +273,7 @@ mod tests {
     #[test]
     fn test_build_script_contains_backend() {
         let manifest = test_manifest();
-        let script = generate_build_script(&manifest, Path::new("test-project.fut")).unwrap();
+        let script = generate_build_script(&manifest, Path::new("test-project.fut")).expect("TODO: handle error");
         assert!(script.contains("futhark opencl test-project.fut"));
         assert!(!script.contains("autotune"));
     }
@@ -282,14 +282,14 @@ mod tests {
     fn test_build_script_with_tuning() {
         let mut manifest = test_manifest();
         manifest.gpu.tuning = true;
-        let script = generate_build_script(&manifest, Path::new("test-project.fut")).unwrap();
+        let script = generate_build_script(&manifest, Path::new("test-project.fut")).expect("TODO: handle error");
         assert!(script.contains("futhark autotune"));
     }
 
     #[test]
     fn test_build_script_checks_futhark_installed() {
         let manifest = test_manifest();
-        let script = generate_build_script(&manifest, Path::new("test.fut")).unwrap();
+        let script = generate_build_script(&manifest, Path::new("test.fut")).expect("TODO: handle error");
         assert!(script.contains("command -v futhark"));
     }
 }
