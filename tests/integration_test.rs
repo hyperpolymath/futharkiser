@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Integration tests for futharkiser.
@@ -333,7 +333,7 @@ fn test_generated_fut_has_spdx_header() {
 
     let fut_source = fs::read_to_string(output_dir.join("image-pipeline.fut")).unwrap();
     assert!(
-        fut_source.contains("PMPL-1.0-or-later"),
+        fut_source.contains("MPL-2.0"),
         ".fut file should have SPDX header"
     );
 }
