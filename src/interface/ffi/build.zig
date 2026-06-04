@@ -1,10 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 // Futharkiser FFI Build Configuration
 //
 // Builds the Zig FFI shared/static library that bridges between the host
 // application and Futhark-compiled GPU kernels.
 //
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
 const std = @import("std");
 

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 #![allow(
     dead_code,
     clippy::too_many_arguments,
@@ -13,8 +15,6 @@
     clippy::type_complexity
 )]
 #![forbid(unsafe_code)]
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // futharkiser library API.
 //

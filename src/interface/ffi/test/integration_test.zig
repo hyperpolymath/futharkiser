@@ -1,11 +1,11 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 // Futharkiser Integration Tests
 //
 // Verify that the Zig FFI correctly implements the Idris2 ABI declared in
 // src/interface/abi/Foreign.idr. These tests exercise the full lifecycle:
 // init, buffer allocation, compilation (stubbed), execution (stubbed), and cleanup.
 //
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
 const std = @import("std");
 const testing = std.testing;
