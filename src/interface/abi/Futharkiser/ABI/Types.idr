@@ -22,6 +22,7 @@ module Futharkiser.ABI.Types
 import Data.Bits
 import Data.So
 import Data.Vect
+import Decidable.Equality
 
 %default total
 
@@ -37,10 +38,7 @@ data Platform = Linux | Windows | MacOS | BSD | WASM
 ||| Set during compilation based on target architecture
 public export
 thisPlatform : Platform
-thisPlatform =
-  %runElab do
-    -- Platform detection logic; override with compiler flags
-    pure Linux
+thisPlatform = Linux
 
 --------------------------------------------------------------------------------
 -- GPU Backend Selection
@@ -74,7 +72,18 @@ DecEq GPUBackend where
   decEq CUDA       CUDA       = Yes Refl
   decEq Multicore  Multicore  = Yes Refl
   decEq Sequential Sequential = Yes Refl
-  decEq _          _          = No absurd
+  decEq OpenCL     CUDA       = No (\case Refl impossible)
+  decEq OpenCL     Multicore  = No (\case Refl impossible)
+  decEq OpenCL     Sequential = No (\case Refl impossible)
+  decEq CUDA       OpenCL     = No (\case Refl impossible)
+  decEq CUDA       Multicore  = No (\case Refl impossible)
+  decEq CUDA       Sequential = No (\case Refl impossible)
+  decEq Multicore  OpenCL     = No (\case Refl impossible)
+  decEq Multicore  CUDA       = No (\case Refl impossible)
+  decEq Multicore  Sequential = No (\case Refl impossible)
+  decEq Sequential OpenCL     = No (\case Refl impossible)
+  decEq Sequential CUDA       = No (\case Refl impossible)
+  decEq Sequential Multicore  = No (\case Refl impossible)
 
 --------------------------------------------------------------------------------
 -- Second-Order Array Combinators (SOACs)
@@ -112,7 +121,26 @@ DecEq SOAC where
   decEq Scan    Scan    = Yes Refl
   decEq Scatter Scatter = Yes Refl
   decEq Reshape Reshape = Yes Refl
-  decEq _       _       = No absurd
+  decEq Map     Reduce  = No (\case Refl impossible)
+  decEq Map     Scan    = No (\case Refl impossible)
+  decEq Map     Scatter = No (\case Refl impossible)
+  decEq Map     Reshape = No (\case Refl impossible)
+  decEq Reduce  Map     = No (\case Refl impossible)
+  decEq Reduce  Scan    = No (\case Refl impossible)
+  decEq Reduce  Scatter = No (\case Refl impossible)
+  decEq Reduce  Reshape = No (\case Refl impossible)
+  decEq Scan    Map     = No (\case Refl impossible)
+  decEq Scan    Reduce  = No (\case Refl impossible)
+  decEq Scan    Scatter = No (\case Refl impossible)
+  decEq Scan    Reshape = No (\case Refl impossible)
+  decEq Scatter Map     = No (\case Refl impossible)
+  decEq Scatter Reduce  = No (\case Refl impossible)
+  decEq Scatter Scan    = No (\case Refl impossible)
+  decEq Scatter Reshape = No (\case Refl impossible)
+  decEq Reshape Map     = No (\case Refl impossible)
+  decEq Reshape Reduce  = No (\case Refl impossible)
+  decEq Reshape Scan    = No (\case Refl impossible)
+  decEq Reshape Scatter = No (\case Refl impossible)
 
 --------------------------------------------------------------------------------
 -- Memory Space (GPU memory hierarchy)
@@ -136,7 +164,12 @@ DecEq MemorySpace where
   decEq Device Device = Yes Refl
   decEq Host   Host   = Yes Refl
   decEq Shared Shared = Yes Refl
-  decEq _      _      = No absurd
+  decEq Device Host   = No (\case Refl impossible)
+  decEq Device Shared = No (\case Refl impossible)
+  decEq Host   Device = No (\case Refl impossible)
+  decEq Host   Shared = No (\case Refl impossible)
+  decEq Shared Device = No (\case Refl impossible)
+  decEq Shared Host   = No (\case Refl impossible)
 
 ||| Proof that a memory transfer direction is valid.
 ||| Host -> Device and Device -> Host are always valid.
@@ -247,7 +280,62 @@ DecEq Result where
   decEq CompilationFailed  CompilationFailed  = Yes Refl
   decEq BackendUnavailable BackendUnavailable = Yes Refl
   decEq ShapeMismatch      ShapeMismatch      = Yes Refl
-  decEq _                  _                  = No absurd
+  decEq Ok                 Error              = No (\case Refl impossible)
+  decEq Ok                 InvalidParam       = No (\case Refl impossible)
+  decEq Ok                 OutOfMemory        = No (\case Refl impossible)
+  decEq Ok                 NullPointer        = No (\case Refl impossible)
+  decEq Ok                 CompilationFailed  = No (\case Refl impossible)
+  decEq Ok                 BackendUnavailable = No (\case Refl impossible)
+  decEq Ok                 ShapeMismatch      = No (\case Refl impossible)
+  decEq Error              Ok                 = No (\case Refl impossible)
+  decEq Error              InvalidParam       = No (\case Refl impossible)
+  decEq Error              OutOfMemory        = No (\case Refl impossible)
+  decEq Error              NullPointer        = No (\case Refl impossible)
+  decEq Error              CompilationFailed  = No (\case Refl impossible)
+  decEq Error              BackendUnavailable = No (\case Refl impossible)
+  decEq Error              ShapeMismatch      = No (\case Refl impossible)
+  decEq InvalidParam       Ok                 = No (\case Refl impossible)
+  decEq InvalidParam       Error              = No (\case Refl impossible)
+  decEq InvalidParam       OutOfMemory        = No (\case Refl impossible)
+  decEq InvalidParam       NullPointer        = No (\case Refl impossible)
+  decEq InvalidParam       CompilationFailed  = No (\case Refl impossible)
+  decEq InvalidParam       BackendUnavailable = No (\case Refl impossible)
+  decEq InvalidParam       ShapeMismatch      = No (\case Refl impossible)
+  decEq OutOfMemory        Ok                 = No (\case Refl impossible)
+  decEq OutOfMemory        Error              = No (\case Refl impossible)
+  decEq OutOfMemory        InvalidParam       = No (\case Refl impossible)
+  decEq OutOfMemory        NullPointer        = No (\case Refl impossible)
+  decEq OutOfMemory        CompilationFailed  = No (\case Refl impossible)
+  decEq OutOfMemory        BackendUnavailable = No (\case Refl impossible)
+  decEq OutOfMemory        ShapeMismatch      = No (\case Refl impossible)
+  decEq NullPointer        Ok                 = No (\case Refl impossible)
+  decEq NullPointer        Error              = No (\case Refl impossible)
+  decEq NullPointer        InvalidParam       = No (\case Refl impossible)
+  decEq NullPointer        OutOfMemory        = No (\case Refl impossible)
+  decEq NullPointer        CompilationFailed  = No (\case Refl impossible)
+  decEq NullPointer        BackendUnavailable = No (\case Refl impossible)
+  decEq NullPointer        ShapeMismatch      = No (\case Refl impossible)
+  decEq CompilationFailed  Ok                 = No (\case Refl impossible)
+  decEq CompilationFailed  Error              = No (\case Refl impossible)
+  decEq CompilationFailed  InvalidParam       = No (\case Refl impossible)
+  decEq CompilationFailed  OutOfMemory        = No (\case Refl impossible)
+  decEq CompilationFailed  NullPointer        = No (\case Refl impossible)
+  decEq CompilationFailed  BackendUnavailable = No (\case Refl impossible)
+  decEq CompilationFailed  ShapeMismatch      = No (\case Refl impossible)
+  decEq BackendUnavailable Ok                 = No (\case Refl impossible)
+  decEq BackendUnavailable Error              = No (\case Refl impossible)
+  decEq BackendUnavailable InvalidParam       = No (\case Refl impossible)
+  decEq BackendUnavailable OutOfMemory        = No (\case Refl impossible)
+  decEq BackendUnavailable NullPointer        = No (\case Refl impossible)
+  decEq BackendUnavailable CompilationFailed  = No (\case Refl impossible)
+  decEq BackendUnavailable ShapeMismatch      = No (\case Refl impossible)
+  decEq ShapeMismatch      Ok                 = No (\case Refl impossible)
+  decEq ShapeMismatch      Error              = No (\case Refl impossible)
+  decEq ShapeMismatch      InvalidParam       = No (\case Refl impossible)
+  decEq ShapeMismatch      OutOfMemory        = No (\case Refl impossible)
+  decEq ShapeMismatch      NullPointer        = No (\case Refl impossible)
+  decEq ShapeMismatch      CompilationFailed  = No (\case Refl impossible)
+  decEq ShapeMismatch      BackendUnavailable = No (\case Refl impossible)
 
 --------------------------------------------------------------------------------
 -- Opaque Handles
@@ -263,8 +351,10 @@ data Handle : Type where
 ||| Returns Nothing if pointer is null.
 public export
 createHandle : Bits64 -> Maybe Handle
-createHandle 0 = Nothing
-createHandle ptr = Just (MkHandle ptr)
+createHandle ptr =
+  case choose (ptr /= 0) of
+    Left ok => Just (MkHandle ptr {nonNull = ok})
+    Right _ => Nothing
 
 ||| Extract pointer value from handle.
 public export
@@ -330,10 +420,15 @@ ptrSize MacOS   = 64
 ptrSize BSD     = 64
 ptrSize WASM    = 32
 
-||| Pointer type for platform
+||| Pointer type for platform.
+||| 32-bit on WASM, 64-bit elsewhere, matching `ptrSize`.
 public export
 CPtr : Platform -> Type -> Type
-CPtr p _ = Bits (ptrSize p)
+CPtr WASM    _ = Bits32
+CPtr Linux   _ = Bits64
+CPtr Windows _ = Bits64
+CPtr MacOS   _ = Bits64
+CPtr BSD     _ = Bits64
 
 --------------------------------------------------------------------------------
 -- Memory Layout Proofs
@@ -431,4 +526,6 @@ namespace Verify
   verifyTransfer Shared Host   = Right SharedToHost
   verifyTransfer Device Shared = Right SharedFromDev
   verifyTransfer Shared Device = Right SharedToDev
-  verifyTransfer s      s      = Right SameSpace
+  verifyTransfer Host   Host   = Right SameSpace
+  verifyTransfer Device Device = Right SameSpace
+  verifyTransfer Shared Shared = Right SameSpace
