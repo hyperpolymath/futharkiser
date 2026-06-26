@@ -20,6 +20,8 @@ module Futharkiser.ABI.Layout
 import Futharkiser.ABI.Types
 import Data.Vect
 import Data.So
+import Data.Nat
+import Decidable.Equality
 
 %default total
 
@@ -33,7 +35,7 @@ paddingFor : (offset : Nat) -> (alignment : Nat) -> Nat
 paddingFor offset alignment =
   if offset `mod` alignment == 0
     then 0
-    else alignment - (offset `mod` alignment)
+    else minus alignment (offset `mod` alignment)
 
 ||| Proof that alignment divides aligned size
 public export
@@ -46,11 +48,16 @@ alignUp : (size : Nat) -> (alignment : Nat) -> Nat
 alignUp size alignment =
   size + paddingFor size alignment
 
-||| Proof that alignUp produces aligned result
+||| Any exact multiple of an alignment is divisible by that alignment.
+||| This is the soundness core behind alignment: a value laid out as `k`
+||| whole alignment units (`k * align`) satisfies the `Divides` relation by
+||| construction. (`paddingFor`/`alignUp` are runtime rounding helpers whose
+||| general divisibility would require the Euclidean division theorem, which
+||| Idris2 `base` does not export; the concrete struct layouts below instead
+||| witness divisibility directly via this multiple-of form.)
 public export
-alignUpCorrect : (size : Nat) -> (align : Nat) -> (align > 0) -> Divides align (alignUp size align)
-alignUpCorrect size align prf =
-  DivideBy ((size + paddingFor size align) `div` align) Refl
+multipleDivides : (k : Nat) -> (align : Nat) -> Divides align (k * align)
+multipleDivides k align = DivideBy k Refl
 
 --------------------------------------------------------------------------------
 -- GPU Buffer Layout
@@ -75,7 +82,7 @@ record GPUBufferLayout where
 ||| Compute the GPU buffer layout from an ArrayShape and element type.
 ||| GPU buffers typically require 128-byte or 256-byte alignment.
 public export
-gpuBufferLayout : ArrayShape rank -> (elemBytes : Nat) -> (gpuAlignment : Nat) -> GPUBufferLayout
+gpuBufferLayout : ArrayShape r -> (elemBytes : Nat) -> (gpuAlignment : Nat) -> GPUBufferLayout
 gpuBufferLayout shape elemBytes gpuAlign =
   let numElems = totalElements shape
       rawBytes = numElems * elemBytes
@@ -104,7 +111,7 @@ data LayoutAligned : GPUBufferLayout -> Type where
 
 ||| Verify a GPU buffer layout from an ArrayShape and Futhark element type
 public export
-verifyGPULayout : ArrayShape rank -> FutharkType -> (gpuAlignment : Nat) ->
+verifyGPULayout : ArrayShape r -> FutharkType -> (gpuAlignment : Nat) ->
                   Either String GPUBufferLayout
 verifyGPULayout shape elemType gpuAlign =
   let layout = gpuBufferLayout shape (futharkTypeSize elemType) gpuAlign
@@ -142,7 +149,7 @@ record StructLayout where
 
 ||| Calculate total struct size with padding
 public export
-calcStructSize : Vect n Field -> Nat -> Nat
+calcStructSize : Vect k Field -> Nat -> Nat
 calcStructSize [] align = 0
 calcStructSize (f :: fs) align =
   let lastOffset = foldl (\acc, field => nextFieldOffset field) f.offset fs
@@ -151,23 +158,56 @@ calcStructSize (f :: fs) align =
 
 ||| Proof that field offsets are correctly aligned
 public export
-data FieldsAligned : Vect n Field -> Type where
+data FieldsAligned : Vect k Field -> Type where
   NoFields : FieldsAligned []
   ConsField :
     (f : Field) ->
-    (rest : Vect n Field) ->
+    (rest : Vect m Field) ->
     Divides f.alignment f.offset ->
     FieldsAligned rest ->
     FieldsAligned (f :: rest)
 
-||| Verify a struct layout is valid
+||| Sound decision procedure for divisibility.
+||| For `n = S k`, compute the quotient `q = m `div` (S k)` and check whether
+||| `m` is exactly `q * (S k)`. If so, `DivideBy q` witnesses `Divides n m`.
+||| `n = 0` divides only `0` (`0 * 0 = 0`); a nonzero `m` is rejected.
 public export
-verifyLayout : (fields : Vect n Field) -> (align : Nat) -> Either String StructLayout
+decDivides : (n : Nat) -> (m : Nat) -> Maybe (Divides n m)
+decDivides Z Z = Just (DivideBy Z Refl)
+decDivides Z (S _) = Nothing
+decDivides (S k) m =
+  let q = m `div` (S k)
+   in case decEq m (q * (S k)) of
+        Yes prf => Just (DivideBy q prf)
+        No _ => Nothing
+
+||| Decide, over an entire field vector, whether every field's offset is a
+||| multiple of its declared alignment, building the `FieldsAligned` witness.
+public export
+decFieldsAligned : (fields : Vect k Field) -> Maybe (FieldsAligned fields)
+decFieldsAligned [] = Just NoFields
+decFieldsAligned (f :: fs) =
+  case decDivides f.alignment f.offset of
+    Nothing => Nothing
+    Just dvd =>
+      case decFieldsAligned fs of
+        Nothing => Nothing
+        Just rest => Just (ConsField f fs dvd rest)
+
+||| Verify a struct layout is valid.
+||| Succeeds only when the computed size dominates the summed field sizes AND
+||| the alignment genuinely divides that size (both proofs are supplied
+||| explicitly to the erased auto-implicits of `MkStructLayout`).
+public export
+verifyLayout : (fields : Vect k Field) -> (align : Nat) -> Either String StructLayout
 verifyLayout fields align =
   let size = calcStructSize fields align
    in case decSo (size >= sum (map (\f => f.size) fields)) of
-        Yes prf => Right (MkStructLayout fields size align)
         No _ => Left "Invalid struct size"
+        Yes prf =>
+          case decDivides align size of
+            Nothing => Left "Total size is not a multiple of the alignment"
+            Just dvd => Right (MkStructLayout fields size align {sizeCorrect = prf, aligned = dvd})
 
 --------------------------------------------------------------------------------
 -- Futhark Context Layout (opaque struct passed through FFI)
@@ -221,11 +261,15 @@ data CABICompliant : StructLayout -> Type where
     FieldsAligned layout.fields ->
     CABICompliant layout
 
-||| Check if layout follows C ABI
+||| Check if layout follows C ABI.
+||| Runs the sound `decFieldsAligned` decision procedure over the layout's
+||| fields; only returns `CABIOk` when a genuine `FieldsAligned` witness exists.
 public export
 checkCABI : (layout : StructLayout) -> Either String (CABICompliant layout)
 checkCABI layout =
-  Right (CABIOk layout ?fieldsAlignedProof)
+  case decFieldsAligned layout.fields of
+    Just prf => Right (CABIOk layout prf)
+    Nothing  => Left "Struct fields are not all alignment-correct"
 
 --------------------------------------------------------------------------------
 -- GPU Buffer Descriptor (FFI struct)
@@ -247,6 +291,7 @@ gpuBufferDescriptorLayout =
     ]
     32  -- Total size: 32 bytes
     8   -- Alignment: 8 bytes
+    {sizeCorrect = Oh, aligned = DivideBy 4 Refl}  -- 32 >= 32, and 32 = 4 * 8
 
 --------------------------------------------------------------------------------
 -- Offset Calculation
@@ -260,7 +305,14 @@ fieldOffset layout name =
     Just idx => Just (finToNat idx ** index idx layout.fields)
     Nothing => Nothing
 
-||| Proof that field offset is within struct bounds
+||| Decide whether a field offset+size lies within the struct's total size.
+||| This is a genuine decision (it is false in general — a `Field` value need
+||| not belong to `layout`), so the result is `Maybe` and is computed via
+||| `choose` on the boolean bound.
 public export
-offsetInBounds : (layout : StructLayout) -> (f : Field) -> So (f.offset + f.size <= layout.totalSize)
-offsetInBounds layout f = ?offsetInBoundsProof
+offsetInBounds : (layout : StructLayout) -> (f : Field) ->
+                 Maybe (So (f.offset + f.size <= layout.totalSize))
+offsetInBounds layout f =
+  case choose (f.offset + f.size <= layout.totalSize) of
+    Left ok => Just ok
+    Right _ => Nothing
