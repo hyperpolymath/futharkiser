@@ -154,9 +154,11 @@ export fn futharkiser_free(raw_handle: ?*anyopaque) void {
 /// Returns a kernel handle on success, or null on compilation failure.
 export fn futharkiser_compile(
     raw_handle: ?*anyopaque,
-    _source: [*:0]const u8,
-    _backend_id: u32,
+    source: [*:0]const u8,
+    backend_id: u32,
 ) ?*anyopaque {
+    _ = source;
+    _ = backend_id;
     const handle: *FutharkiserHandle = @ptrCast(@alignCast(raw_handle orelse {
         setError("Null library handle");
         return null;
@@ -180,9 +182,11 @@ export fn futharkiser_compile(
 /// Compile a Futhark source file to a GPU kernel.
 export fn futharkiser_compile_file(
     raw_handle: ?*anyopaque,
-    _file_path: [*:0]const u8,
-    _backend_id: u32,
+    file_path: [*:0]const u8,
+    backend_id: u32,
 ) ?*anyopaque {
+    _ = file_path;
+    _ = backend_id;
     const handle: *FutharkiserHandle = @ptrCast(@alignCast(raw_handle orelse {
         setError("Null library handle");
         return null;
@@ -205,9 +209,11 @@ export fn futharkiser_compile_file(
 /// Execute a compiled GPU kernel by entry-point name.
 export fn futharkiser_execute(
     raw_handle: ?*anyopaque,
-    _kernel_handle: ?*anyopaque,
-    _entry_point: [*:0]const u8,
+    kernel_handle: ?*anyopaque,
+    entry_point: [*:0]const u8,
 ) Result {
+    _ = kernel_handle;
+    _ = entry_point;
     const handle: *FutharkiserHandle = @ptrCast(@alignCast(raw_handle orelse {
         setError("Null library handle");
         return .null_pointer;
@@ -302,10 +308,13 @@ export fn futharkiser_free_buffer(
 /// Transfer data between memory spaces (host <-> device).
 export fn futharkiser_transfer(
     raw_handle: ?*anyopaque,
-    _src_handle: ?*anyopaque,
-    _dst_handle: ?*anyopaque,
-    _flags: u64,
+    src_handle: ?*anyopaque,
+    dst_handle: ?*anyopaque,
+    flags: u64,
 ) Result {
+    _ = src_handle;
+    _ = dst_handle;
+    _ = flags;
     const handle: *FutharkiserHandle = @ptrCast(@alignCast(raw_handle orelse {
         setError("Null library handle");
         return .null_pointer;
