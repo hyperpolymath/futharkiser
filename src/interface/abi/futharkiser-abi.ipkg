@@ -7,3 +7,4 @@ modules = Futharkiser.ABI.Types
         , Futharkiser.ABI.Layout
         , Futharkiser.ABI.Foreign
         , Futharkiser.ABI.Proofs
+        , Futharkiser.ABI.Semantics
