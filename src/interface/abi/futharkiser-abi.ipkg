@@ -10,3 +10,4 @@ modules = Futharkiser.ABI.Types
         , Futharkiser.ABI.Semantics
         , Futharkiser.ABI.Invariants
         , Futharkiser.ABI.FfiSeam
+        , Futharkiser.ABI.Capstone
