@@ -8,3 +8,4 @@ modules = Futharkiser.ABI.Types
         , Futharkiser.ABI.Foreign
         , Futharkiser.ABI.Proofs
         , Futharkiser.ABI.Semantics
+        , Futharkiser.ABI.Invariants
