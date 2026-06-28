@@ -273,7 +273,8 @@ mod tests {
     #[test]
     fn test_build_script_contains_backend() {
         let manifest = test_manifest();
-        let script = generate_build_script(&manifest, Path::new("test-project.fut")).expect("TODO: handle error");
+        let script = generate_build_script(&manifest, Path::new("test-project.fut"))
+            .expect("TODO: handle error");
         assert!(script.contains("futhark opencl test-project.fut"));
         assert!(!script.contains("autotune"));
     }
@@ -282,14 +283,16 @@ mod tests {
     fn test_build_script_with_tuning() {
         let mut manifest = test_manifest();
         manifest.gpu.tuning = true;
-        let script = generate_build_script(&manifest, Path::new("test-project.fut")).expect("TODO: handle error");
+        let script = generate_build_script(&manifest, Path::new("test-project.fut"))
+            .expect("TODO: handle error");
         assert!(script.contains("futhark autotune"));
     }
 
     #[test]
     fn test_build_script_checks_futhark_installed() {
         let manifest = test_manifest();
-        let script = generate_build_script(&manifest, Path::new("test.fut")).expect("TODO: handle error");
+        let script =
+            generate_build_script(&manifest, Path::new("test.fut")).expect("TODO: handle error");
         assert!(script.contains("command -v futhark"));
     }
 }

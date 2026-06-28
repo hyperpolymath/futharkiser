@@ -50,10 +50,8 @@ pub fn parse_single_kernel(raw: &RawKernelConfig) -> Result<KernelConfig> {
                 );
             }
         }
-        SOAC::Histogram => {
-            if raw.bins.is_none() || raw.bins == Some(0) {
-                bail!("Kernel '{}': histogram pattern requires bins > 0", raw.name);
-            }
+        SOAC::Histogram if (raw.bins.is_none() || raw.bins == Some(0)) => {
+            bail!("Kernel '{}': histogram pattern requires bins > 0", raw.name);
         }
         _ => {}
     }

@@ -186,13 +186,11 @@ fn validate_kernel(
                 );
             }
         }
-        SOAC::Histogram => {
-            if kernel.bins.is_none() || kernel.bins == Some(0) {
-                bail!(
-                    "{}: 'histogram' pattern requires a 'bins' field with a positive integer",
-                    ctx
-                );
-            }
+        SOAC::Histogram if (kernel.bins.is_none() || kernel.bins == Some(0)) => {
+            bail!(
+                "{}: 'histogram' pattern requires a 'bins' field with a positive integer",
+                ctx
+            );
         }
         _ => {}
     }
@@ -502,20 +500,44 @@ operator = "+"
 
     #[test]
     fn test_parse_all_backends() {
-        assert_eq!(parse_backend("opencl").expect("TODO: handle error"), GPUBackend::OpenCL);
-        assert_eq!(parse_backend("cuda").expect("TODO: handle error"), GPUBackend::CUDA);
-        assert_eq!(parse_backend("multicore").expect("TODO: handle error"), GPUBackend::Multicore);
-        assert_eq!(parse_backend("c").expect("TODO: handle error"), GPUBackend::C);
+        assert_eq!(
+            parse_backend("opencl").expect("TODO: handle error"),
+            GPUBackend::OpenCL
+        );
+        assert_eq!(
+            parse_backend("cuda").expect("TODO: handle error"),
+            GPUBackend::CUDA
+        );
+        assert_eq!(
+            parse_backend("multicore").expect("TODO: handle error"),
+            GPUBackend::Multicore
+        );
+        assert_eq!(
+            parse_backend("c").expect("TODO: handle error"),
+            GPUBackend::C
+        );
         assert!(parse_backend("vulkan").is_err());
     }
 
     #[test]
     fn test_parse_all_patterns() {
         assert_eq!(parse_pattern("map").expect("TODO: handle error"), SOAC::Map);
-        assert_eq!(parse_pattern("reduce").expect("TODO: handle error"), SOAC::Reduce);
-        assert_eq!(parse_pattern("scan").expect("TODO: handle error"), SOAC::Scan);
-        assert_eq!(parse_pattern("scatter").expect("TODO: handle error"), SOAC::Scatter);
-        assert_eq!(parse_pattern("histogram").expect("TODO: handle error"), SOAC::Histogram);
+        assert_eq!(
+            parse_pattern("reduce").expect("TODO: handle error"),
+            SOAC::Reduce
+        );
+        assert_eq!(
+            parse_pattern("scan").expect("TODO: handle error"),
+            SOAC::Scan
+        );
+        assert_eq!(
+            parse_pattern("scatter").expect("TODO: handle error"),
+            SOAC::Scatter
+        );
+        assert_eq!(
+            parse_pattern("histogram").expect("TODO: handle error"),
+            SOAC::Histogram
+        );
     }
 
     #[test]
