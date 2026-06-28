@@ -186,13 +186,11 @@ fn validate_kernel(
                 );
             }
         }
-        SOAC::Histogram => {
-            if kernel.bins.is_none() || kernel.bins == Some(0) {
-                bail!(
-                    "{}: 'histogram' pattern requires a 'bins' field with a positive integer",
-                    ctx
-                );
-            }
+        SOAC::Histogram if (kernel.bins.is_none() || kernel.bins == Some(0)) => {
+            bail!(
+                "{}: 'histogram' pattern requires a 'bins' field with a positive integer",
+                ctx
+            );
         }
         _ => {}
     }
